@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  surname   String
+  username  String
+  email     String        @unique
+  password  String         @unique
+  phone     String         @unique
+  Cash      UserCash[]
+  // DebtsOwed Debt[]     @relation("DebtsOwed")
+  DebtsPaid Debt[]     @relation("DebtsPaid")
+  ReceivableDebts CashReceivable[] @relation("UserReceivableDebts")
+  intermediatedTransfers MoneyTransfer[] @relation("IntermediatedMoney")
+  // SentMoney MoneyTransfer[] @relation("SentMoney")
+  // ReceivedMoney MoneyTransfer[] @relation("ReceivedMoney")
+  isActive  Boolean       @default(false)
+  roleId    Int
+  role      Role    @relation(fields: [roleId], references: [id])
+  Accounts  Account[]
+  Clients   Client[]
+}
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+model UserCash {
+  id           Int     @id @default(autoincrement())
+  totalCash    Int     @default(0)
+  cashCurrency String
+  userId       Int
+  user         User    @relation(fields: [userId], references: [id])
+}
+
+model Debt {
+  id               Int      @id @default(autoincrement())
+  debtAmount       Int      // Changed from Float to Int
+  debtCurrency     String
+  debtorId         Int
+  debtor           Client     @relation("ClientDebts", fields: [debtorId], references: [id])
+  creditorId       Int
+  creditor         User     @relation("DebtsPaid", fields: [creditorId], references: [id])
+  debtIssuanceDate DateTime
+  debtRepaymentDate DateTime
+}
+model CashReceivable{
+  id               Int      @id @default(autoincrement())
+  debtAmount       Int      // Changed from Float to Int
+  debtCurrency     String
+  debtorId         Int
+  debtor           User       @relation("UserReceivableDebts", fields: [debtorId], references: [id])
+  creditorId       Int
+  creditor         Client     @relation("ClientReceivableOwed", fields: [creditorId], references: [id])
+  debtIssuanceDate DateTime
+  debtRepaymentDate DateTime
+}
+
+model MoneyTransfer {
+  id             Int      @id @default(autoincrement())
+  receivedAmount Int     
+  moneyCurrency  String
+  senderId       Int
+  sender         Client     @relation("SentMoney", fields: [senderId], references: [id])
+  receiverId     Int
+  receiver       Client      @relation("ReceivedMoney", fields: [receiverId], references: [id])
+  intermediaryId  Int
+  intermediary    User     @relation("IntermediatedMoney", fields: [intermediaryId], references: [id])
+  receivedDate   DateTime
+  transferDate   DateTime
+
+}
+
+model Account {
+  id           Int     @id @default(autoincrement())
+  totalAmount  Int     @default(0)  
+  totalCurrency String
+  clientId     Int
+  userId       Int
+  user         User    @relation(fields: [userId], references: [id])
+  client       Client  @relation(fields: [clientId], references: [id])
+}
+
+model Client {
+  id           Int     @id @default(autoincrement())
+  clientName   String
+  clientSurname String
+  clientPhone   String
+  userId        Int
+  DebtsOwed     Debt[] @relation("ClientDebts")
+  ReceivableOwed CashReceivable[] @relation("ClientReceivableOwed")
+  SentMoney      MoneyTransfer[] @relation("SentMoney")
+  ReceivedMoney  MoneyTransfer[] @relation("ReceivedMoney")
+
+
+
+  user          User   @relation(fields: [userId], references: [id])
+  accounts     Account[]
+}
+model Multilanguage {
+  id              Int      @id @default(autoincrement())
+  MlCode          String   @unique
+  CountryCode     String
+  MlValue         String
+  ApplicationCode String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isDeleted       Boolean  @default(false)
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}

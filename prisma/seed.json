@@ -1,0 +1,28 @@
+{
+  "User": [
+    {
+      "username": "user1",
+      "email": "user1@example.com",
+      "password": "password1",
+      "phone": "1234567890"
+    },
+    {
+      "username": "user2",
+      "email": "user2@example.com",
+      "password": "password2",
+      "phone": "9876543210"
+    }
+  ],
+  "UserCash": [],
+  "Debt": [],
+  "MoneyTransfer": [],
+  "Account": [],
+  "Client": [
+    {
+      "clientName": "Client1",
+      "clientSurname": "Client1Surname",
+      "clientEmail": "client1@example.com",
+      "clientPhone": "1111111111"
+    }
+  ]
+}
